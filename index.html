@@ -1,0 +1,2141 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>پنل کاربری</title>
+  <style>
+    @font-face {
+      font-family: Vazirmatn;
+      src: url("https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn%5Bwght%5D.woff2") format("woff2-variations");
+      font-weight: 100 900;
+      font-display: swap;
+    }
+
+    :root {
+      --bg: #0e0c0a;
+      --bg-2: #10151c;
+      --surface: #141920;
+      --surface-2: #1a202a;
+      --text: #e8eef4;
+      --muted: #8a96a8;
+      --accent: #6ba3c7;
+      --accent-soft: rgba(107, 163, 199, 0.22);
+      --accent-dim: rgba(107, 163, 199, 0.10);
+      --line: rgba(107, 163, 199, 0.16);
+      --ok: #5dab7a;
+      --warn: #c9a040;
+      --bad: #c07068;
+      --alert: #e8a09a;
+      --max: 460px;
+      --r: 10px;
+      --r-sm: 8px;
+      --h-ico: 40px;
+      --h-ctl: 48px;
+      --os-gap: 8px;
+      --os-pad: 12px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --dur: 0.42s;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    body {
+      min-height: 100dvh;
+      font-family: Vazirmatn, Tahoma, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      padding: max(24px, env(safe-area-inset-top)) 20px max(32px, env(safe-area-inset-bottom));
+      -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 90% 50% at 50% -10%, rgba(61, 90, 128, 0.22), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(45, 70, 100, 0.14), transparent 50%),
+        linear-gradient(180deg, #121820 0%, var(--bg) 40%, #0a0c10 100%);
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: var(--max);
+      min-width: 0;
+      margin: 0 auto;
+      animation: rise 0.55s var(--ease) both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .crown {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 18px;
+      opacity: 0.4;
+    }
+
+    .crown span {
+      width: 3px;
+      height: 14px;
+      border-radius: 2px;
+      background: linear-gradient(180deg, var(--accent), transparent);
+    }
+
+    .crown span:nth-child(2), .crown span:nth-child(4) { height: 20px; }
+    .crown span:nth-child(3) { height: 26px; }
+
+    .head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 20px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .user,
+    .stat-v,
+    .stat-v-sm,
+    .os-name,
+    .os-tag,
+    .cfg-name,
+    .app-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user {
+      font-size: 1.85rem;
+      font-weight: 700;
+      width: 100%;
+      line-height: 1;
+      margin: 0 0 16px;
+      text-box-trim: trim-both;
+      text-box-edge: cap alphabetic;
+    }
+
+    .sub-status {
+      display: block;
+      width: 100%;
+      margin: 0 0 16px;
+      font-size: 0.86rem;
+      font-weight: 500;
+      line-height: 1.5;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .sub-status-v {
+      margin: 0 2px;
+      font-weight: 700;
+      font-style: normal;
+      transition: color 0.25s var(--ease);
+    }
+
+    .sub-status.ok .sub-status-v { color: var(--ok); }
+    .sub-status.warn .sub-status-v { color: var(--warn); }
+    .sub-status.bad .sub-status-v { color: var(--alert); }
+
+    .head-chips {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 250px;
+      margin-inline: auto;
+    }
+
+    .chip,
+    .support-btn {
+      display: inline-grid;
+      grid-auto-flow: column;
+      align-items: center;
+      justify-content: center;
+      column-gap: 8px;
+      box-sizing: border-box;
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: 118px;
+      height: var(--h-ico);
+      padding: 0 14px;
+      border-radius: 999px;
+      font: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      line-height: 1;
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: background 0.2s var(--ease), border-color 0.2s;
+    }
+
+    .chip-label {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1;
+    }
+
+    .chip-cap {
+      color: var(--accent);
+      border: 1.5px solid rgba(107, 163, 199, 0.45);
+      background: rgba(107, 163, 199, 0.08);
+    }
+
+    .chip-cap svg,
+    .support-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      display: block;
+      margin: 0;
+    }
+
+    .support-btn {
+      display: none;
+      border: 1.5px solid rgba(232, 160, 154, 0.55);
+      background: rgba(232, 160, 154, 0.07);
+      color: var(--alert);
+    }
+
+    .btn svg,
+    .modal-title svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .support-btn.on { display: inline-grid; }
+    .support-btn:hover {
+      background: rgba(232, 160, 154, 0.14);
+      border-color: rgba(232, 160, 154, 0.8);
+      color: var(--alert);
+    }
+    .support-btn:active { opacity: 0.88; }
+
+    .renew-alert {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--alert);
+      padding: 13px 16px;
+      margin-bottom: 14px;
+      border: 1.5px solid rgba(192, 112, 104, 0.7);
+      border-radius: var(--r);
+      background: rgba(192, 112, 104, 0.09);
+      text-align: center;
+      line-height: 1.55;
+      animation: rise 0.4s var(--ease) both;
+    }
+
+    .renew-alert.on { display: flex; }
+
+    .renew-dot,
+    .stat-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--bad);
+      box-shadow: 0 0 0 0 rgba(192, 112, 104, 0.55);
+      animation: blink-dot 1.35s ease-out infinite;
+    }
+
+    .notice {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-height: var(--h-ctl);
+      padding: 10px 16px;
+      margin-bottom: 16px;
+      border: 1.5px solid rgba(240, 160, 64, 0.65);
+      border-radius: var(--r);
+      background: rgba(240, 160, 64, 0.07);
+      text-align: center;
+      animation: rise 0.4s var(--ease) both;
+    }
+
+    .notice.on { display: flex; }
+
+    .notice #notice-t {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #f0a040;
+      line-height: 1.45;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      text-align: center;
+      white-space: normal;
+    }
+
+    .notice a { color: #ffb84d; font-weight: 700; text-decoration: none; }
+    .notice a:hover { text-decoration: underline; }
+
+    @keyframes blink-dot {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(192, 112, 104, 0.5); }
+      50% { opacity: 0.35; box-shadow: 0 0 0 6px rgba(192, 112, 104, 0); }
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat { overflow: hidden; }
+
+    .stat-title,
+    .apps-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-bottom: none;
+      border-radius: var(--r) var(--r) 0 0;
+    }
+
+    .stat-title { transition: color 0.25s var(--ease); }
+
+    .stat-pulse { display: none; }
+    .stat-title.alert { color: var(--alert); }
+    .stat-title.alert .stat-pulse { display: block; }
+
+    .stat-body,
+    .apps-body {
+      padding: var(--os-pad);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 0 0 var(--r) var(--r);
+    }
+
+    .stat-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stat-rem,
+    .stat-tot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      height: var(--h-ctl);
+      padding: 0 10px;
+      border-radius: var(--r-sm);
+      min-width: 0;
+    }
+
+    .stat-rem {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-soft);
+    }
+
+    .stat-tot {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+    }
+
+    .stat-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .stat-v {
+      font-size: 1rem;
+      font-weight: 700;
+      max-width: 62%;
+      text-align: end;
+      color: var(--text);
+    }
+
+    .stat-v-sm {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--muted);
+      max-width: 62%;
+      text-align: end;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 2px;
+    }
+
+    .bar {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 9px;
+      background: var(--bg-2);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bar i {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--accent), #8ec0df);
+      border-radius: 99px;
+      transition: width 0.55s var(--ease);
+    }
+
+    .bar.warn i { background: linear-gradient(90deg, var(--warn), #e0c070); }
+    .bar.bad i { background: linear-gradient(90deg, var(--bad), #d89088); }
+    .bar.ok i { background: linear-gradient(90deg, var(--ok), #7ecf9a); }
+
+    .bar-pct {
+      flex-shrink: 0;
+      min-width: 2.6em;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-align: end;
+    }
+
+    .bar-row.warn .bar-pct { color: var(--warn); }
+    .bar-row.bad .bar-pct { color: var(--bad); }
+    .bar-row.ok .bar-pct { color: var(--ok); }
+
+    .btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      display: inline-grid;
+      grid-auto-flow: column;
+      align-items: center;
+      justify-content: center;
+      column-gap: 8px;
+      width: 100%;
+      min-width: 0;
+      height: var(--h-ctl);
+      padding: 0 12px;
+      border: 1px solid var(--accent);
+      border-radius: var(--r);
+      background: var(--accent);
+      color: var(--bg);
+      font: inherit;
+      font-size: 0.95rem;
+      font-weight: 400;
+      line-height: 1;
+      cursor: pointer;
+      overflow: hidden;
+      transition: filter 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+
+    .btn > span {
+      display: block;
+      line-height: 1;
+    }
+
+    .btn:hover {
+      filter: brightness(1.08);
+      box-shadow: 0 6px 20px rgba(107, 163, 199, 0.18);
+    }
+    .btn:active { transform: scale(0.98); }
+
+    .os-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--os-gap);
+    }
+
+    .apps-panel { overflow: hidden; min-width: 0; }
+
+    .apps-body .empty {
+      padding: 16px 12px;
+      border: none;
+      background: transparent;
+    }
+
+    .os-tile {
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      height: var(--h-ctl);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      cursor: pointer;
+      font: inherit;
+      color: inherit;
+      line-height: 1;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.22s var(--ease), background 0.22s var(--ease), transform 0.22s var(--ease);
+      overflow: hidden;
+      animation: rise 0.45s var(--ease) both;
+    }
+
+    .os-tile-in {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 10px;
+      pointer-events: none;
+      line-height: 0;
+    }
+
+    .os-tile:nth-child(1) { animation-delay: 0.04s; }
+    .os-tile:nth-child(2) { animation-delay: 0.08s; }
+    .os-tile:nth-child(3) { animation-delay: 0.12s; }
+    .os-tile:nth-child(4) { animation-delay: 0.16s; }
+    .os-tile:nth-child(n+5) { animation-delay: 0.2s; }
+
+    .os-tile:hover {
+      background: var(--surface-2);
+      border-color: var(--accent-soft);
+      transform: translateY(-1px);
+    }
+
+    .os-tile:active { transform: translateY(0) scale(0.98); }
+
+    .os-tile.ios .os-logo { color: #e8e8ed; background: rgba(160, 160, 170, 0.1); border-color: rgba(160, 160, 170, 0.28); }
+    .os-tile.android .os-logo,
+    .os-tile.androidtv .os-logo { color: #3ddc84; background: rgba(61, 220, 132, 0.08); border-color: rgba(61, 220, 132, 0.28); }
+    .os-tile.windows .os-logo { color: #50a8eb; background: rgba(0, 120, 212, 0.1); border-color: rgba(0, 120, 212, 0.28); }
+    .os-tile.macos .os-logo { color: #c8c8cc; background: rgba(180, 180, 190, 0.1); border-color: rgba(180, 180, 190, 0.28); }
+    .os-tile.linux .os-logo { color: #fcc624; background: rgba(252, 198, 36, 0.08); border-color: rgba(252, 198, 36, 0.28); }
+    .os-tile.appletv .os-logo { color: #f5f5f7; background: rgba(200, 200, 210, 0.08); border-color: rgba(200, 200, 210, 0.25); }
+    .os-tile.web .os-logo { color: #7eb8ff; background: rgba(66, 133, 244, 0.1); border-color: rgba(66, 133, 244, 0.28); }
+    .os-tile.other .os-logo { color: var(--muted); background: rgba(138, 150, 168, 0.08); border-color: rgba(138, 150, 168, 0.25); }
+
+    .os-tile.current {
+      border-color: rgba(93, 171, 122, 0.7);
+      background: rgba(93, 171, 122, 0.08);
+    }
+
+    .os-tile.current:hover {
+      border-color: rgba(93, 171, 122, 0.9);
+      background: rgba(93, 171, 122, 0.12);
+    }
+
+    .os-tag {
+      display: inline-grid;
+      grid-auto-flow: column;
+      align-items: center;
+      justify-content: center;
+      column-gap: 6px;
+      flex: 0 0 auto;
+      height: 28px;
+      max-width: 55%;
+      padding: 0 10px 0 8px;
+      border: 1.5px solid rgba(93, 171, 122, 0.65);
+      border-radius: 999px;
+      background: rgba(93, 171, 122, 0.1);
+      color: var(--ok);
+      font-size: 0.62rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .os-live {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--ok);
+      box-shadow: 0 0 0 0 rgba(93, 171, 122, 0.55);
+      animation: blink-ok 1.35s ease-out infinite;
+    }
+
+    @keyframes blink-ok {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(93, 171, 122, 0.5); }
+      50% { opacity: 0.35; box-shadow: 0 0 0 6px rgba(93, 171, 122, 0); }
+    }
+
+    .os-logo {
+      display: grid;
+      place-items: center;
+      flex: 0 0 28px;
+      width: 28px;
+      height: 28px;
+      border: 1px solid transparent;
+      border-radius: var(--r-sm);
+      line-height: 0;
+      overflow: hidden;
+    }
+
+    .os-logo svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      margin: 0;
+      overflow: visible;
+      flex-shrink: 0;
+    }
+
+    .os-name {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: 28px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      line-height: 1;
+      text-align: end;
+    }
+
+    .os-list { display: grid; gap: 12px; }
+
+    .app-card {
+      padding: 16px;
+      min-width: 0;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      animation: rise 0.35s var(--ease) both;
+      transition: border-color 0.2s var(--ease);
+    }
+
+    .app-card:hover { border-color: var(--accent-soft); }
+
+    .app-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .app-ico {
+      width: var(--h-ico);
+      height: var(--h-ico);
+      min-width: var(--h-ico);
+      border: 1px solid var(--line);
+      border-radius: var(--r-sm);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      background: var(--bg-2);
+      line-height: 0;
+      overflow: hidden;
+    }
+
+    .app-ico svg {
+      width: 22px;
+      height: 22px;
+      display: block;
+      margin: 0;
+      flex-shrink: 0;
+      overflow: visible;
+    }
+
+    .app-ico.ios { color: #e8e8ed; border-color: rgba(160, 160, 170, 0.35); }
+    .app-ico.android, .app-ico.androidtv { color: #3ddc84; border-color: rgba(61, 220, 132, 0.35); }
+    .app-ico.windows { color: #50a8eb; border-color: rgba(0, 120, 212, 0.35); }
+    .app-ico.macos, .app-ico.appletv { color: #c8c8cc; border-color: rgba(180, 180, 190, 0.32); }
+    .app-ico.linux { color: #fcc624; border-color: rgba(252, 198, 36, 0.32); }
+    .app-ico.web { color: #7eb8ff; border-color: rgba(66, 133, 244, 0.32); }
+    .app-ico.other { color: var(--muted); border-color: rgba(138, 150, 168, 0.28); }
+
+    .app-info { flex: 1; min-width: 0; }
+
+    .app-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      min-width: 0;
+    }
+
+    .app-name {
+      display: block;
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 0;
+    }
+
+    .app-tag {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 26px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .app-tag.rec {
+      border: 1.5px solid rgba(240, 160, 64, 0.65);
+      background: rgba(240, 160, 64, 0.1);
+      color: #f0a040;
+    }
+
+    .app-desc {
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      white-space: normal;
+    }
+
+    .app-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .act-btn {
+      display: inline-grid;
+      grid-auto-flow: column;
+      align-items: center;
+      justify-content: center;
+      column-gap: 7px;
+      width: 100%;
+      min-width: 0;
+      height: var(--h-ctl);
+      padding: 0 10px;
+      border: 1.5px solid rgba(93, 171, 122, 0.65);
+      border-radius: var(--r);
+      background: rgba(93, 171, 122, 0.07);
+      color: var(--ok);
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1;
+      text-decoration: none;
+      transition: background 0.12s, border-color 0.12s;
+    }
+
+    .act-btn svg {
+      width: 17px;
+      height: 17px;
+      display: block;
+      margin: 0;
+      flex-shrink: 0;
+      pointer-events: none;
+    }
+
+    .act-btn span {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    .act-btn:hover {
+      background: rgba(93, 171, 122, 0.12);
+      border-color: rgba(93, 171, 122, 0.75);
+      color: var(--ok);
+    }
+
+    .act-btn.import {
+      border-color: rgba(107, 163, 199, 0.65);
+      background: rgba(107, 163, 199, 0.07);
+      color: var(--accent);
+    }
+
+    .act-btn.import:hover {
+      background: rgba(107, 163, 199, 0.12);
+      border-color: rgba(107, 163, 199, 0.75);
+      color: var(--accent);
+    }
+
+    .empty {
+      padding: 28px 16px;
+      text-align: center;
+      font-size: 0.84rem;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: var(--r);
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0);
+      visibility: hidden;
+      pointer-events: none;
+      transition: background 0.22s ease, visibility 0.22s;
+    }
+
+    .overlay.on {
+      visibility: visible;
+      pointer-events: auto;
+      background: rgba(0, 0, 0, 0.72);
+    }
+
+    .modal {
+      width: 100%;
+      max-width: var(--max);
+      max-height: 88dvh;
+      min-width: 0;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px 18px 0 0;
+      border-bottom: none;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translate3d(0, 100%, 0);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+      contain: layout paint;
+    }
+
+    .overlay.on .modal {
+      transform: translate3d(0, 0, 0);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: calc(var(--h-ico) + 28px);
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      min-height: var(--h-ico);
+    }
+
+    .modal-x {
+      width: var(--h-ico);
+      height: var(--h-ico);
+      min-width: var(--h-ico);
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--r-sm);
+      background: transparent;
+      color: var(--muted);
+      font-size: 1.35rem;
+      font-weight: 400;
+      cursor: pointer;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .modal-x:hover { color: var(--accent); border-color: var(--accent-soft); }
+    .modal-x:active { opacity: 0.85; }
+
+    .modal-body {
+      padding: 18px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .qr-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .qr-frame {
+      position: relative;
+      width: min(230px, 100%);
+      padding: 18px;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+    }
+
+    .qr-frame::before,
+    .qr-frame::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--accent);
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .qr-frame::before {
+      top: 8px;
+      right: 8px;
+      border-left: none;
+      border-bottom: none;
+      border-radius: 0 4px 0 0;
+    }
+
+    .qr-frame::after {
+      bottom: 8px;
+      left: 8px;
+      border-right: none;
+      border-top: none;
+      border-radius: 0 0 0 4px;
+    }
+
+    .qr-wrap {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      aspect-ratio: 1;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .qr-wrap canvas,
+    .qr-wrap img { display: block; max-width: 100%; max-height: 100%; margin: 0 auto; }
+
+    .qr-hint {
+      font-size: 0.76rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .link-row,
+    .cfg-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      min-height: calc(var(--h-ico) + 24px);
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+    }
+
+    .link-row {
+      width: 100%;
+      padding: 12px 8px;
+    }
+
+    .link-row input {
+      flex: 1;
+      min-width: 0;
+      height: var(--h-ico);
+      padding: 0 4px;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      font-size: 0.72rem;
+      line-height: var(--h-ico);
+      direction: ltr;
+      text-align: left;
+      appearance: none;
+      -webkit-appearance: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .link-row button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: var(--h-ico);
+      height: var(--h-ico);
+      padding: 0;
+      border: 1px solid var(--accent);
+      border-radius: var(--r);
+      background: var(--accent);
+      color: var(--bg);
+      font: inherit;
+      line-height: 0;
+      cursor: pointer;
+    }
+
+    .link-row button svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+      flex-shrink: 0;
+      pointer-events: none;
+    }
+
+    .link-row button.copied {
+      background: var(--ok);
+      border-color: var(--ok);
+      color: #fff;
+    }
+
+    .cfg-list { display: grid; gap: 8px; }
+
+    .cfg-item {
+      flex-wrap: wrap;
+      padding: 12px;
+      transition: border-color 0.2s var(--ease);
+      animation: rise 0.3s var(--ease) both;
+    }
+
+    .cfg-item:hover { border-color: var(--accent-soft); }
+
+    .cfg-name {
+      flex: 1 1 0;
+      min-width: 0;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    .cfg-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      flex: 0 0 auto;
+      max-width: 100%;
+    }
+
+    .cfg-btns button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      width: var(--h-ico);
+      height: var(--h-ico);
+      min-width: var(--h-ico);
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.68rem;
+      font-weight: 600;
+      line-height: 1;
+      cursor: pointer;
+      transition: border-color 0.12s, background 0.12s, color 0.12s;
+    }
+
+    .cfg-btns button svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+      flex-shrink: 0;
+      pointer-events: none;
+    }
+
+    .cfg-btns button:hover { border-color: var(--accent-soft); color: var(--accent); }
+
+    .cfg-btns button.copied {
+      background: var(--ok);
+      border-color: var(--ok);
+      color: #fff;
+    }
+
+    .loader {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: grid;
+      place-items: center;
+      background: rgba(14, 12, 10, 0.85);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.25s var(--ease), visibility 0.25s;
+    }
+
+    .loader.on {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .loader i {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--line);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 400px) {
+      :root {
+        --os-gap: 6px;
+        --os-pad: 10px;
+      }
+
+      body {
+        padding-left: max(12px, env(safe-area-inset-left));
+        padding-right: max(12px, env(safe-area-inset-right));
+      }
+
+      .user { font-size: 1.55rem; }
+      .chip,
+      .support-btn {
+        padding: 0 12px;
+        font-size: 0.74rem;
+      }
+      .head-chips { gap: 6px; }
+
+      .stats { gap: 8px; }
+      .stat-body,
+      .modal-body { padding: 10px; }
+      .stat-rem,
+      .stat-tot { padding: 0 8px; }
+      .stat-v { font-size: 0.9rem; }
+      .stat-sub { font-size: 0.64rem; }
+
+      .btn {
+        column-gap: 5px;
+        padding: 0 8px;
+        font-size: 0.82rem;
+      }
+      .btn svg { width: 15px; height: 15px; }
+
+      .os-tile-in { padding: 0 8px; gap: 6px; }
+      .os-name { font-size: 0.78rem; }
+      .os-tag {
+        max-width: 62%;
+        font-size: 0.55rem;
+        padding: 0 8px 0 6px;
+        gap: 4px;
+      }
+
+      .cfg-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .cfg-name {
+        flex: none;
+        width: 100%;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+        line-height: 1.35;
+      }
+      .cfg-btns {
+        width: 100%;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+      }
+      .cfg-btns button {
+        flex: 0 0 var(--h-ico);
+      }
+
+      .act-btn { font-size: 0.78rem; }
+      .modal-head { padding: 12px; gap: 8px; }
+      .modal-title { font-size: 0.92rem; }
+    }
+
+    @media (min-width: 500px) {
+      .overlay { align-items: center; padding: 20px; }
+      .modal {
+        border-bottom: 1px solid var(--line);
+        border-radius: 16px;
+        transform: translate3d(0, 28px, 0);
+        opacity: 0;
+        transition: transform 0.24s ease, opacity 0.2s ease;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+      }
+      .overlay.on .modal {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="crown" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+
+    <header class="head">
+      <h1 class="user" id="user">—</h1>
+      <p class="sub-status ok" id="sub-status">
+        اشتراک شما <em class="sub-status-v" id="sub-status-v">—</em> است
+      </p>
+      <div class="head-chips">
+        <span class="chip chip-cap" id="chip-cap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M10 17h4"/></svg>
+          <span class="chip-label" id="chip-cap-t">—</span>
+        </span>
+        <a class="support-btn" id="support-btn" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2Z"/></svg>
+          <span class="chip-label">پشتیبانی</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="renew-alert" id="renew-alert" role="alert">
+      <span class="renew-dot" aria-hidden="true"></span>
+      <span>جهت تمدید با پشتیبان در ارتباط باشید</span>
+    </div>
+
+    <div class="notice" id="notice"><span id="notice-t"></span></div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-title" id="vol-title"><span class="stat-pulse" aria-hidden="true"></span>حجم</div>
+        <div class="stat-body">
+          <div class="stat-rem"><span class="stat-sub">باقی‌مانده</span><span class="stat-v" id="vol-rem">—</span></div>
+          <div class="stat-tot"><span class="stat-sub">کل</span><span class="stat-v-sm" id="vol-tot">—</span></div>
+          <div class="bar-row" id="vol-bar-row">
+            <div class="bar" id="vol-bar-wrap"><i id="vol-bar"></i></div>
+            <span class="bar-pct" id="vol-pct"></span>
+          </div>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-title" id="exp-title"><span class="stat-pulse" aria-hidden="true"></span>زمان</div>
+        <div class="stat-body">
+          <div class="stat-rem"><span class="stat-sub">باقی‌مانده</span><span class="stat-v" id="exp-rem">—</span></div>
+          <div class="stat-tot"><span class="stat-sub">کل</span><span class="stat-v-sm" id="exp-tot">—</span></div>
+          <div class="bar-row" id="exp-bar-row">
+            <div class="bar" id="exp-bar-wrap"><i id="exp-bar"></i></div>
+            <span class="bar-pct" id="exp-pct"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btns">
+      <button class="btn" type="button" id="btn-sub">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <span>لینک اشتراک</span>
+      </button>
+      <button class="btn" type="button" id="btn-cfg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>کانفیگ‌ها</span>
+      </button>
+    </div>
+
+    <div id="apps">
+      <div class="apps-panel">
+        <div class="apps-title">اپلیکیشن‌ها</div>
+        <div class="apps-body"><div class="empty">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="m-apps" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-head">
+        <span class="modal-title" id="m-apps-t">اپلیکیشن‌ها</span>
+        <button class="modal-x" type="button" data-close="m-apps" aria-label="بستن">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="os-list" id="m-apps-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="m-sub" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-head">
+        <span class="modal-title" id="m-sub-t">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span id="m-sub-label">لینک اشتراک</span>
+        </span>
+        <button class="modal-x" type="button" data-close="m-sub" aria-label="بستن">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="qr-panel">
+          <div class="qr-frame">
+            <div class="qr-wrap" id="qr">…</div>
+          </div>
+          <p class="qr-hint">اسکن کنید یا لینک را کپی کنید</p>
+          <div class="link-row">
+            <input id="sub-link" type="text" readonly>
+            <button type="button" id="copy-sub" data-ico="copy" aria-label="کپی" title="کپی">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="m-cfg" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-head">
+        <span class="modal-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span>کانفیگ‌ها</span>
+        </span>
+        <button class="modal-x" type="button" data-close="m-cfg" aria-label="بستن">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="cfg-list" id="cfg-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loader" id="loader"><i></i></div>
+
+  <script>
+  (function () {
+    var LS = { panel: "pg_panel", token: "pg_token" };
+    var CFG = window.PASARGUARD_CONFIG || window.PANEL_USER_CONFIG || {};
+    var S = { ctx: null, user: null, hdr: {}, links: [], apps: [], items: [], groups: {}, qr: null };
+
+    var STATUS = { active: "فعال", disabled: "غیرفعال", limited: "محدود", expired: "منقضی", on_hold: "معلق" };
+    var PLAT = { ios: "iOS", android: "Android", windows: "Windows", macos: "macOS", linux: "Linux", appletv: "Apple TV", androidtv: "Android TV", web: "وب", other: "سایر" };
+    var PLAT_ORDER = ["ios", "android", "windows", "macos", "linux", "appletv", "androidtv", "web", "other"];
+    var TOKEN_KEYS = ["token", "sub", "sub_token", "subscription", "subscription_token"];
+    var ICO = {
+      qr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14h1v1M14 20h1v1M17 17h1v1M20 17h1v4h-4v-1"/></svg>',
+      copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+      check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
+      dl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>',
+      add: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>'
+    };
+
+    function $(id) { return document.getElementById(id); }
+
+    function esc(s) {
+      return String(s == null ? "" : s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function faNum(s) { return String(s == null ? "" : s).replace(/\d/g, function (d) { return "۰۱۲۳۴۵۶۷۸۹"[d]; }); }
+
+    function load(on) { $("loader").classList.toggle("on", !!on); }
+    function open(id) {
+      $(id).classList.add("on");
+      $(id).setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+    function close(id) {
+      $(id).classList.remove("on");
+      $(id).setAttribute("aria-hidden", "true");
+      if (!document.querySelector(".overlay.on")) document.body.style.overflow = "";
+    }
+
+    function flashCopy(btn) {
+      if (!btn) return;
+      var restore = btn.getAttribute("data-ico") || "copy";
+      btn.innerHTML = ICO.check;
+      btn.classList.add("copied");
+      btn.disabled = true;
+      setTimeout(function () {
+        btn.innerHTML = ICO[restore] || ICO.copy;
+        btn.classList.remove("copied");
+        btn.disabled = false;
+      }, 1400);
+    }
+
+    function copy(txt, btn) {
+      function ok() { flashCopy(btn); }
+      if (navigator.clipboard) return navigator.clipboard.writeText(String(txt || "")).then(ok);
+      var t = document.createElement("textarea");
+      t.value = String(txt || "");
+      document.body.appendChild(t);
+      t.select();
+      document.execCommand("copy");
+      document.body.removeChild(t);
+      ok();
+    }
+
+    function cleanToken(v) {
+      v = String(v || "").trim().replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/^['"]|['"]$/g, "");
+      try { v = decodeURIComponent(v); } catch (e) {}
+      return v.replace(/^\/+|\/+$/g, "");
+    }
+
+    function parseInput(raw) {
+      raw = String(raw || "").trim();
+      if (!raw) return null;
+      try {
+        if (/^[a-z][a-z0-9+.-]*:/i.test(raw)) {
+          var u = new URL(raw);
+          for (var i = 0; i < TOKEN_KEYS.length; i++) {
+            var q = u.searchParams.get(TOKEN_KEYS[i]);
+            if (q) return { panel: u.searchParams.get("panel") || u.searchParams.get("panel_url") || u.origin, token: cleanToken(q) };
+          }
+          var path = u.pathname.replace(/\/+$/, "").replace(/\/(?:info|apps|links|raw|usage)$/i, "");
+          var parts = path.split("/").filter(Boolean);
+          var token = parts.length ? cleanToken(parts[parts.length - 1]) : "";
+          if (token && !/\.(?:html?|php)$/i.test(token)) return { panel: u.origin, token: token, subPath: path };
+        }
+      } catch (e) {}
+      if (raw.indexOf("/") > -1 && raw.indexOf("://") === -1) {
+        var p = raw.split(/[?#]/)[0].replace(/\/+$/, "").replace(/\/(?:info|apps|links|raw|usage)$/i, "");
+        var ps = p.split("/").filter(Boolean);
+        if (ps.length) return { token: cleanToken(ps[ps.length - 1]), subPath: p.charAt(0) === "/" ? p : "/" + p };
+      }
+      if (!/\s/.test(raw) && raw.indexOf("/") === -1) return { token: cleanToken(raw) };
+      return null;
+    }
+
+    function makeCtx(panel, token) {
+      var p = typeof token === "object" ? token : parseInput(token);
+      if (!p || !p.token) return null;
+      panel = String(p.panel || panel || location.origin || "").trim().replace(/\/+$/, "");
+      if (panel && !/^https?:\/\//i.test(panel)) panel = "https://" + panel;
+      if (!panel) return null;
+      var sp = p.subPath || "/sub/" + encodeURIComponent(p.token);
+      if (sp.charAt(0) !== "/") sp = "/" + sp;
+      sp = sp.replace(/\/+$/, "");
+      return {
+        panel: panel,
+        subUrl: panel + sp + "/",
+        infoUrl: panel + sp + "/info",
+        appsUrl: panel + sp + "/apps",
+        linksUrl: panel + sp + "/links",
+        rawUrl: panel + sp + "/raw"
+      };
+    }
+
+    function detect() {
+      var d = parseInput(location.href) || parseInput(location.hash.replace(/^#/, ""));
+      if (d && d.token) return makeCtx(d.panel || "", d);
+      var qs = new URLSearchParams(location.search);
+      var panel = qs.get("panel") || qs.get("panel_url") || location.origin;
+      for (var i = 0; i < TOKEN_KEYS.length; i++) if (qs.get(TOKEN_KEYS[i])) return makeCtx(panel, qs.get(TOKEN_KEYS[i]));
+      return null;
+    }
+
+    function req(url, opt, ms) {
+      opt = opt || {}; ms = ms || 10000;
+      if (!window.AbortController) return fetch(url, opt);
+      var c = new AbortController(), t = setTimeout(function () { c.abort(); }, ms);
+      opt.signal = c.signal;
+      return fetch(url, opt).then(function (r) { clearTimeout(t); return r; }, function (e) { clearTimeout(t); throw e; });
+    }
+
+    function getInfo() {
+      return req(S.ctx.infoUrl, { credentials: "same-origin", headers: { Accept: "application/json" } }, 8000).then(function (r) {
+        if (!r.ok) throw new Error("خطا");
+        return r.json().then(function (d) {
+          var u = d && (d.user || d.data || d);
+          if (d && u && u !== d && typeof u === "object") u = Object.assign({}, d, u);
+          return {
+            user: u,
+            hdr: {
+              announce: r.headers.get("announce") || "",
+              announceUrl: r.headers.get("announce-url") || "",
+              supportUrl: r.headers.get("support-url") || r.headers.get("support") || r.headers.get("telegram") || ""
+            }
+          };
+        });
+      });
+    }
+
+    function parseLinks(p) {
+      if (!p) return [];
+      if (Array.isArray(p)) return p;
+      if (typeof p === "object") return parseLinks(p.links || p.configs || p.proxies || p.raw || p.data || []);
+      return String(p).split(/\r?\n/);
+    }
+
+    function getLinks(url) {
+      return req(url, { credentials: "same-origin", headers: { Accept: "application/json, text/plain, */*" } })
+        .then(function (r) {
+          if (!r.ok) return [];
+          var ct = r.headers.get("content-type") || "";
+          return ct.indexOf("json") > -1 ? r.json().then(parseLinks) : r.text().then(parseLinks);
+        })
+        .then(function (l) { return l.map(function (x) { return String(x || "").trim(); }).filter(Boolean); })
+        .catch(function () { return []; });
+    }
+
+    function fetchLinks() {
+      return getLinks(S.ctx.linksUrl).then(function (l) {
+        return l.length ? l : getLinks(S.ctx.rawUrl);
+      }).then(function (l) {
+        return l.length ? l : getLinks(S.ctx.subUrl);
+      });
+    }
+
+    function fetchApps() {
+      return req(S.ctx.appsUrl, { credentials: "same-origin", headers: { Accept: "application/json" } })
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (d) {
+          var l = Array.isArray(d) ? d : (d && (d.apps || d.data || d.clients)) || [];
+          return Array.isArray(l) ? l.map(normApp) : [];
+        }).catch(function () { return []; });
+    }
+
+    function g(o, k) {
+      for (var i = 0; i < k.length; i++) if (o && o[k[i]] != null && o[k[i]] !== "") return o[k[i]];
+      return null;
+    }
+
+    function stamp(v) {
+      if (v == null || v === "") return null;
+      var n = Number(v);
+      if (isFinite(n) && String(v).trim()) { if (n > 0 && n < 1e11) n *= 1000; return n; }
+      var t = new Date(v).getTime();
+      return isFinite(t) ? t : null;
+    }
+
+    function bytes(v) {
+      v = Number(v);
+      if (!isFinite(v)) return "—";
+      var u = ["بایت", "KB", "MB", "گیگ", "TB"];
+      var i = Math.min(4, Math.floor(Math.log(Math.max(v, 1)) / Math.log(1024)));
+      return faNum((v / Math.pow(1024, i)).toFixed(i > 1 ? 1 : 0).replace(/\.0$/, "")) + " " + u[i];
+    }
+
+    function daysLeft(v) {
+      if (!v) return "∞";
+      var e = stamp(v);
+      if (!e) return String(v);
+      var d = Math.ceil((e - Date.now()) / 86400000);
+      return d <= 0 ? "منقضی" : faNum(d) + " روز";
+    }
+
+    function dateFa(v) {
+      if (!v) return "—";
+      var ms = stamp(v);
+      var d = ms ? new Date(ms) : new Date(v);
+      if (isNaN(d.getTime())) return String(v);
+      try {
+        return new Intl.DateTimeFormat("fa-IR-u-nu-arabext", { year: "numeric", month: "short", day: "numeric" }).format(d);
+      } catch (e) {
+        return d.toLocaleDateString("fa-IR");
+      }
+    }
+
+    function setBar(wrap, bar, pct, tone, pctEl, rowEl, label) {
+      if (!wrap || !bar) return;
+      if (pct == null) {
+        if (rowEl) rowEl.style.display = "none";
+        else wrap.style.display = "none";
+        return;
+      }
+      if (rowEl) {
+        rowEl.style.display = "";
+        rowEl.className = "bar-row" + (tone ? " " + tone : "");
+      }
+      wrap.style.display = "";
+      pct = Math.max(0, Math.min(100, pct));
+      bar.style.width = pct + "%";
+      wrap.className = "bar" + (tone ? " " + tone : "");
+      if (pctEl) pctEl.textContent = label != null ? label : faNum(Math.round(pct)) + "٪";
+    }
+
+    function barTone(pct) {
+      if (pct == null) return "";
+      if (pct < 20) return "bad";
+      if (pct < 40) return "warn";
+      return "";
+    }
+
+    function stKey(v) {
+      v = String(v || "active").toLowerCase();
+      if (v === "enable" || v === "enabled" || v === "true") return "active";
+      if (v === "disable" || v === "inactive" || v === "false") return "disabled";
+      return v;
+    }
+
+    function stCls(s) {
+      s = stKey(s);
+      if (s === "active") return "ok";
+      if (s === "limited" || s === "expired" || s === "on_hold") return "warn";
+      return "bad";
+    }
+
+    function b64(v) {
+      try {
+        v = String(v || "").replace(/-/g, "+").replace(/_/g, "/");
+        while (v.length % 4) v += "=";
+        var b = atob(v);
+        return decodeURIComponent(Array.prototype.map.call(b, function (c) { return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2); }).join(""));
+      } catch (e) { return ""; }
+    }
+
+    function announce(r) {
+      if (!r) return "";
+      if (r.indexOf("base64:") === 0) return b64(r.slice(7)) || r.slice(7);
+      try { return decodeURIComponent(r); } catch (e) { return r; }
+    }
+
+    function safe(v) {
+      try { return decodeURIComponent(String(v || "").replace(/\+/g, "%20")).trim(); }
+      catch (e) { return String(v || "").trim(); }
+    }
+
+    function normalizeContactUrl(value) {
+      value = String(value || "").trim();
+      if (!value) return "";
+      if (value.charAt(0) === "@") return "https://t.me/" + encodeURIComponent(value.slice(1));
+      if (/^[\w.]{3,}$/.test(value) && value.indexOf("@") < 0 && value.indexOf(".") < 0) return "https://t.me/" + encodeURIComponent(value);
+      if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value)) return "mailto:" + value;
+      if (/^https?:\/\//i.test(value) || /^mailto:|^tel:/i.test(value)) return value;
+      if (/^(t\.me|telegram\.me|wa\.me)\//i.test(value)) return "https://" + value;
+      if (/^[\w.-]+\.[a-z]{2,}(?:\/.*)?$/i.test(value)) return "https://" + value;
+      return "";
+    }
+
+    function supportUrl() {
+      var u = S.user || {};
+      return normalizeContactUrl(
+        g(u, ["support_url", "support_link", "support", "support_href", "telegram_url", "telegram_link", "telegram", "telegram_id", "contact_url", "contact_link", "contact", "help_url"]) ||
+        (S.hdr && S.hdr.supportUrl) ||
+        CFG.supportUrl ||
+        CFG.support_url ||
+        ""
+      );
+    }
+
+    function paintSupport() {
+      var url = supportUrl();
+      var btn = $("support-btn");
+      btn.classList.toggle("on", !!url);
+      if (url) btn.href = url;
+      else btn.removeAttribute("href");
+    }
+
+    function paint() {
+      var u = S.user || {};
+      var has = !!S.user;
+      var name = g(u, ["username", "name", "email"]) || "—";
+      var st = stKey(g(u, ["status", "state", "enabled"]) || "active");
+
+      $("user").textContent = name;
+      document.title = has && name !== "—" ? name : "پنل کاربری";
+      paintSupport();
+
+      var tone = has ? stCls(st) : "bad";
+      var statusEl = $("sub-status");
+      statusEl.className = "sub-status " + tone;
+      $("sub-status-v").textContent = has ? (STATUS[st] || st) : "—";
+
+      var cap = g(u, ["hwid_limit", "device_limit", "ip_limit", "max_ips", "max_devices"]);
+      var capN = Number(cap);
+      $("chip-cap-t").textContent = (!has || cap == null || cap === "" || !isFinite(capN) || capN <= 0)
+        ? "نامحدود"
+        : faNum(Math.floor(capN)) + " دستگاه";
+
+      var txt = announce(S.hdr.announce || "");
+      var url = S.hdr.announceUrl || "";
+      $("notice").classList.toggle("on", !!(txt || url));
+      $("notice-t").innerHTML = esc(txt) + (url ? ' · <a href="' + esc(url) + '" target="_blank" rel="noopener">بیشتر</a>' : "");
+
+      var used = Number(g(u, ["used_traffic", "used", "consumed_traffic"]) || 0);
+      var limit = Number(g(u, ["data_limit", "traffic_limit", "total_traffic"]) || 0);
+      var ex = g(u, ["expire", "expire_date", "expiry_time", "end_time"]);
+      if (st === "on_hold" && u.on_hold_timeout) ex = u.on_hold_timeout;
+
+      var remain = limit > 0 ? Math.max(0, limit - used) : null;
+      $("vol-rem").textContent = limit > 0 ? bytes(remain) : "∞";
+      $("vol-tot").textContent = limit > 0 ? bytes(limit) : "∞";
+      var volInfinite = !(limit > 0);
+      var volPct = volInfinite ? 100 : (remain / limit) * 100;
+      var volTone = volInfinite ? "ok" : barTone(volPct);
+      var volLow = !volInfinite && volTone === "bad";
+      setBar($("vol-bar-wrap"), $("vol-bar"), volPct, volTone, $("vol-pct"), $("vol-bar-row"), volInfinite ? "∞" : null);
+      $("vol-title").classList.toggle("alert", volLow);
+
+      var created = stamp(g(u, ["created_at", "created"]));
+      var expMs = stamp(ex);
+      var remText = daysLeft(ex);
+      var totText = "—";
+      var expPct = null;
+      var expInfinite = false;
+
+      if (!ex) {
+        remText = "∞";
+        totText = "∞";
+        expPct = 100;
+        expInfinite = true;
+      } else if (expMs) {
+        if (created && expMs > created) {
+          var totalDays = Math.max(1, Math.ceil((expMs - created) / 86400000));
+          var leftDays = Math.ceil((expMs - Date.now()) / 86400000);
+          totText = faNum(totalDays) + " روز";
+          expPct = (Math.max(0, leftDays) / totalDays) * 100;
+          if (leftDays <= 0) { remText = "منقضی"; expPct = 0; }
+        } else {
+          totText = dateFa(ex);
+        }
+      }
+
+      var expTone = expInfinite ? "ok" : barTone(expPct);
+      var expLow = !expInfinite && expTone === "bad";
+
+      $("exp-rem").textContent = remText;
+      $("exp-tot").textContent = totText;
+      setBar($("exp-bar-wrap"), $("exp-bar"), expPct, expTone, $("exp-pct"), $("exp-bar-row"), expInfinite ? "∞" : null);
+      $("exp-title").classList.toggle("alert", expLow);
+
+      $("renew-alert").classList.toggle("on", has && (st !== "active" || volLow || expLow));
+    }
+
+    function proto(r) {
+      r = String(r || "").toLowerCase();
+      if (r.indexOf("vless://") === 0) return "VLESS";
+      if (r.indexOf("vmess://") === 0) return "VMess";
+      if (r.indexOf("trojan://") === 0) return "Trojan";
+      if (r.indexOf("wireguard://") === 0 || r.indexOf("[interface]") === 0) return "WireGuard";
+      if (r.indexOf("ss://") === 0) return "SS";
+      return "Proxy";
+    }
+
+    function cfgName(r) {
+      r = String(r || "");
+      try {
+        if (r.toLowerCase().indexOf("vmess://") === 0) {
+          var d = JSON.parse(b64(r.slice(8)));
+          if (d && d.ps) return safe(d.ps);
+        }
+        var u = new URL(r);
+        var h = safe(u.hash.replace(/^#/, ""));
+        if (h) return h;
+        return safe(u.searchParams.get("name") || u.searchParams.get("remark") || "");
+      } catch (e) {}
+      var i = r.indexOf("#");
+      return i >= 0 ? safe(r.slice(i + 1)) : "";
+    }
+
+    function buildItems() {
+      S.items = [];
+      if (S.ctx) S.items.push({ title: "لینک اشتراک", payload: S.ctx.subUrl });
+      S.links.forEach(function (r, i) {
+        S.items.push({ title: cfgName(r) || proto(r) + " " + faNum(i + 1), payload: r });
+      });
+      return S.items;
+    }
+
+    function paintCfgs() {
+      var items = buildItems();
+      if (!items.length) { $("cfg-list").innerHTML = '<div class="empty">کانفیگی نیست</div>'; return; }
+      $("cfg-list").innerHTML = items.map(function (it, i) {
+        var wg = wgText(it.payload);
+        return '<div class="cfg-item" data-i="' + i + '">' +
+          '<span class="cfg-name">' + esc(it.title) + '</span>' +
+          '<div class="cfg-btns">' +
+          '<button type="button" data-a="qr" aria-label="QR" title="QR">' + ICO.qr + '</button>' +
+          '<button type="button" data-a="cp" data-ico="copy" aria-label="کپی" title="کپی">' + ICO.copy + '</button>' +
+          (wg ? '<button type="button" data-a="dl" aria-label="دانلود" title="دانلود">' + ICO.dl + '</button>' : '') +
+          '</div></div>';
+      }).join("");
+    }
+
+    function platKey(v) {
+      v = String(v || "other").toLowerCase().replace(/[\s_-]+/g, "");
+      if (/iphone|ipad|ipados/.test(v)) return "ios";
+      if (/mac|macos|osx|darwin/.test(v)) return "macos";
+      if (/win/.test(v)) return "windows";
+      if (/appletv|tvos/.test(v)) return "appletv";
+      if (/androidtv|googletv|firetv/.test(v)) return "androidtv";
+      if (/android/.test(v)) return "android";
+      if (/linux|ubuntu|debian/.test(v)) return "linux";
+      if (/web|browser|pwa/.test(v)) return "web";
+      return v || "other";
+    }
+
+    function pickFa(v) {
+      if (!v) return "";
+      if (typeof v === "string") return v;
+      if (typeof v === "object" && v.fa) return String(v.fa);
+      return "";
+    }
+
+    function isFaLang(v) {
+      v = String(v || "").toLowerCase().trim();
+      if (!v) return true;
+      return v.indexOf("fa") === 0 || v === "persian" || v === "فارسی";
+    }
+
+    function filterFaLinks(links) {
+      return (links || []).filter(function (item) {
+        return item && item.url && isFaLang(item.language || item.lang || item.locale);
+      });
+    }
+
+    function isRecommended(a) {
+      if (!a || typeof a !== "object") return false;
+      var v = a.recommended != null ? a.recommended : (a.is_recommended != null ? a.is_recommended : (a.suggest != null ? a.suggest : a.suggested));
+      if (typeof v === "string") {
+        v = v.toLowerCase().trim();
+        return v === "1" || v === "true" || v === "yes" || v === "recommended";
+      }
+      return !!v;
+    }
+
+    function normApp(a) {
+      if (typeof a === "string") return { name: a, platform: platKey(a), links: [], importUrl: "", importLabel: "", desc: "", recommended: false };
+      a = a || {};
+      var rawName = a.name || a.title || a.app || "اپ";
+      var links = a.download_links || a.downloads || a.links || [];
+      if (!Array.isArray(links)) links = [];
+      var direct = a.url || a.link || a.download;
+      if (direct) links = [{ url: direct, name: a.download_name || "" }].concat(links);
+      links = filterFaLinks(links.map(function (l) {
+        return { url: l.url, name: l.name || l.title || l.label || "", language: l.language || l.lang || l.locale || "" };
+      }));
+      return {
+        name: pickFa(rawName) || (typeof rawName === "string" ? rawName : "اپ"),
+        platform: platKey(a.platform || a.os || rawName),
+        links: links,
+        importUrl: a.import_url || a.import || a.add_url || "",
+        importLabel: pickFa(a.import_name || a.import_label) || "افزودن اشتراک",
+        desc: pickFa(a.description || a.desc || a.subtitle),
+        recommended: isRecommended(a)
+      };
+    }
+
+    function abs(url) {
+      url = String(url || "");
+      if (/^https?:/i.test(url)) return url;
+      try { return new URL(url, S.ctx.panel + "/").href; } catch (e) { return url; }
+    }
+
+    function appCardHtml(app) {
+      var pk = app.platform || "other";
+      var acts = "";
+      app.links.forEach(function (l) {
+        var label = pickFa(l.name) || (typeof l.name === "string" ? l.name : "") || "دانلود";
+        acts += '<a class="act-btn" href="' + esc(abs(l.url)) + '" target="_blank" rel="noopener" aria-label="' + esc(label) + '" title="' + esc(label) + '">' + ICO.dl + '<span>' + esc(label) + '</span></a>';
+      });
+      if (app.importUrl) {
+        acts += '<a class="act-btn import" href="' + esc(abs(app.importUrl)) + '" target="_blank" rel="noopener" aria-label="' + esc(app.importLabel) + '" title="' + esc(app.importLabel) + '">' + ICO.add + '<span>' + esc(app.importLabel) + '</span></a>';
+      }
+      return '<article class="app-card' + (app.recommended ? ' rec' : '') + '">' +
+        '<div class="app-head">' +
+        '<span class="app-ico ' + esc(pk) + '">' + platIcon(pk) + '</span>' +
+        '<div class="app-info">' +
+        '<div class="app-name-row">' +
+        '<span class="app-name">' + esc(app.name) + '</span>' +
+        (app.recommended ? '<span class="app-tag rec">پیشنهادی</span>' : '') +
+        '</div>' +
+        (app.desc ? '<p class="app-desc">' + esc(app.desc) + '</p>' : '') +
+        '</div></div>' +
+        (acts ? '<div class="app-actions">' + acts + '</div>' : '') +
+        '</article>';
+    }
+
+    function groupApps() {
+      var groups = {};
+      S.apps.forEach(function (app) {
+        var k = app.platform || "other";
+        if (!groups[k]) groups[k] = [];
+        groups[k].push(app);
+      });
+      Object.keys(groups).forEach(function (k) {
+        groups[k].sort(function (a, b) {
+          if (!!a.recommended !== !!b.recommended) return a.recommended ? -1 : 1;
+          return String(a.name).localeCompare(String(b.name), "fa");
+        });
+      });
+      S.groups = groups;
+      return groups;
+    }
+
+    var _icoApple = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><g transform="translate(3 0) scale(0.046875)"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></g></svg>';
+    var _icoTv = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="13" rx="2"/><path d="M8 21h8M12 18v3"/></svg>';
+    var PLAT_ICON = {
+      ios: _icoApple,
+      macos: _icoApple,
+      android: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85a.637.637 0 0 0-.83.22l-1.88 3.24a11.463 11.463 0 0 0-8.94 0L5.65 5.67a.643.643 0 0 0-.87-.2.641.641 0 0 0-.26.85l1.84 3.18C4.41 11.22 3 13.79 3 16.78h18c0-2.99-1.41-5.56-3.4-7.3zM8.5 15.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm7 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>',
+      androidtv: _icoTv,
+      appletv: _icoTv,
+      windows: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h7v6H4V5Zm9 0h7v6h-7V5ZM4 13h7v6H4v-6Zm9 0h7v6h-7v-6Z"/></svg>',
+      linux: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C9.6 3 8 5.1 8 8.1c0 1.5-.5 2.8-1.3 4.1L5 15.4c-.7 1.4.2 2.6 1.6 2.6h10.8c1.4 0 2.3-1.2 1.6-2.6l-1.7-3.2C16.5 10.9 16 9.6 16 8.1 16 5.1 14.4 3 12 3zm-3 16.5L7.8 21M15 19.5l1.2 1.5M10 8h.01M14 8h.01"/></svg>',
+      web: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.3 2.5 3.5 5.5 3.5 9S14.3 18.5 12 21M12 3C9.7 5.5 8.5 8.5 8.5 12S9.7 18.5 12 21"/></svg>',
+      other: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></svg>'
+    };
+
+    function platIcon(k) { return PLAT_ICON[k] || PLAT_ICON.other; }
+
+    function detectClientOs() {
+      try {
+        var ua = navigator.userAgent || "";
+        var plat = navigator.platform || "";
+        var ch = navigator.userAgentData;
+
+        if (ch && ch.platform) {
+          var cp = String(ch.platform).toLowerCase();
+          if (cp === "android") return /tv|aft|googletv|bravia|smart-?tv/i.test(ua) ? "androidtv" : "android";
+          if (cp === "ios") return "ios";
+          if (cp === "windows") return "windows";
+          if (cp === "macos") return navigator.maxTouchPoints > 1 ? "ios" : "macos";
+          if (cp === "chrome os" || cp === "chromeos") return "web";
+          if (cp === "linux") return "linux";
+        }
+
+        if (/AppleTV|Apple TV|TVOS/i.test(ua)) return "appletv";
+        if (/iPhone|iPod/i.test(ua)) return "ios";
+        if (/iPad/i.test(ua) || (plat === "MacIntel" && navigator.maxTouchPoints > 1)) return "ios";
+        if (/Android/i.test(ua)) {
+          if (/Android TV|SMART-?TV|GoogleTV|AFT|BRAVIA|\bTV\b/i.test(ua)) return "androidtv";
+          return "android";
+        }
+        if (/Win/i.test(plat) || /Windows/i.test(ua)) return "windows";
+        if (/Mac/i.test(plat) || /Macintosh/i.test(ua)) return "macos";
+        if (/CrOS/i.test(ua)) return "web";
+        if (/Linux/i.test(plat) || /Linux/i.test(ua)) return "linux";
+      } catch (e) {}
+      return "";
+    }
+
+    function openOsModal(k) {
+      var list = S.groups[k] || [];
+      $("m-apps-t").textContent = PLAT[k] || k;
+      $("m-apps-list").innerHTML = list.length ? list.map(appCardHtml).join("") : '<div class="empty">اپلیکیشنی نیست</div>';
+      open("m-apps");
+    }
+
+    function paintApps() {
+      var shell = function (inner) {
+        return '<div class="apps-panel"><div class="apps-title">اپلیکیشن‌ها</div><div class="apps-body">' + inner + '</div></div>';
+      };
+      if (!S.apps.length) {
+        $("apps").innerHTML = shell('<div class="empty">اپلیکیشنی نیست</div>');
+        return;
+      }
+      var groups = groupApps();
+      var keys = PLAT_ORDER.filter(function (k) { return groups[k] && groups[k].length; });
+      Object.keys(groups).forEach(function (k) {
+        if (keys.indexOf(k) < 0) keys.push(k);
+      });
+
+      var current = detectClientOs();
+      if (current && keys.indexOf(current) >= 0) {
+        keys = [current].concat(keys.filter(function (k) { return k !== current; }));
+      }
+
+      $("apps").innerHTML = shell(
+        '<div class="os-grid">' + keys.map(function (k) {
+          var mine = k === current;
+          return '<button type="button" class="os-tile ' + esc(k) + (mine ? " current" : "") + '" data-os="' + esc(k) + '">' +
+            '<span class="os-tile-in">' +
+            (mine
+              ? '<span class="os-tag"><span class="os-live" aria-hidden="true"></span>دستگاه شما</span>'
+              : '<span class="os-logo">' + platIcon(k) + '</span>') +
+            '<span class="os-name">' + esc(PLAT[k] || k) + '</span>' +
+            '</span></button>';
+        }).join("") + '</div>'
+      );
+    }
+
+    function qrLib() {
+      if (window.QRCode) return Promise.resolve();
+      if (S.qr) return S.qr;
+      S.qr = new Promise(function (ok, fail) {
+        var s = document.createElement("script");
+        s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+        s.async = true;
+        s.onload = ok;
+        s.onerror = fail;
+        document.head.appendChild(s);
+      });
+      return S.qr;
+    }
+
+    function showQr(text) {
+      var el = $("qr");
+      el.textContent = "…";
+      qrLib().then(function () {
+        el.innerHTML = "";
+        try {
+          new QRCode(el, {
+            text: text,
+            width: 200,
+            height: 200,
+            colorDark: "#e8eef4",
+            colorLight: "rgba(0,0,0,0)",
+            correctLevel: QRCode.CorrectLevel.M
+          });
+          var c = el.querySelector("canvas");
+          if (c) { c.style.display = "block"; c.style.width = "100%"; c.style.height = "auto"; c.style.aspectRatio = "1"; }
+        } catch (e) { el.textContent = "QR در دسترس نیست"; }
+      }).catch(function () { el.textContent = "خطا"; });
+    }
+
+    function openSub(title, payload) {
+      $("m-sub-label").textContent = title || "لینک اشتراک";
+      $("sub-link").value = payload;
+      var cpBtn = $("copy-sub");
+      cpBtn.innerHTML = ICO.copy;
+      cpBtn.classList.remove("copied");
+      cpBtn.disabled = false;
+      showQr(payload);
+      open("m-sub");
+    }
+
+    function wgParam(p, n) {
+      var d = p.get(n);
+      if (d) return d;
+      var target = n.toLowerCase(), found = "";
+      p.forEach(function (v, k) { if (!found && k.toLowerCase() === target) found = v; });
+      return found;
+    }
+
+    function wgText(raw) {
+      raw = String(raw || "").trim();
+      if (/^\[Interface\]/i.test(raw)) return raw + (raw.slice(-1) === "\n" ? "" : "\n");
+      if (!/^wireguard:\/\//i.test(raw)) return null;
+      try {
+        var u = new URL(raw), p = u.searchParams;
+        var pk = safe(u.username || wgParam(p, "privatekey"));
+        var pub = wgParam(p, "publickey"), addr = wgParam(p, "address"), ep = wgParam(p, "endpoint");
+        if (!pk || !pub || !addr) return null;
+        var host = u.hostname;
+        if (host.indexOf(":") >= 0 && host[0] !== "[") host = "[" + host + "]";
+        if (!ep) ep = u.port ? host + ":" + u.port : host;
+        return ["[Interface]", "PrivateKey = " + pk, "Address = " + addr, "", "[Peer]", "PublicKey = " + pub,
+          "AllowedIPs = 0.0.0.0/0, ::/0", "Endpoint = " + ep, "PersistentKeepalive = 25"].join("\n") + "\n";
+      } catch (e) { return null; }
+    }
+
+    function fileName(preferred) {
+      var u = S.user || {};
+      var user = String(g(u, ["username", "name"]) || "").trim();
+      var clean = function (s) {
+        return String(s || "")
+          .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "")
+          .replace(/[\s\u200c\u200e\u200f\u202a-\u202e]+/g, "-")
+          .replace(/-+/g, "-")
+          .replace(/^[-.]+|[-.]+$/g, "");
+      };
+      return clean(preferred) || clean(user) || "wireguard";
+    }
+
+    function dl(text, name) {
+      var b = new Blob([text], { type: "text/plain" });
+      var u = URL.createObjectURL(b);
+      var a = document.createElement("a");
+      a.href = u;
+      a.download = fileName(name) + ".conf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(u);
+    }
+
+    function boot(c) {
+      S.ctx = c;
+      S.user = null;
+      S.hdr = {};
+      S.links = [];
+      S.apps = [];
+      localStorage.setItem(LS.panel, c.panel);
+      localStorage.setItem(LS.token, c.subUrl);
+      load(true);
+      fetchLinks().then(function (l) {
+        S.links = l;
+      });
+      fetchApps().then(function (a) { S.apps = a; paintApps(); });
+      getInfo().then(function (r) { S.user = r.user; S.hdr = r.hdr; paint(); })
+        .catch(function () {})
+        .finally(function () { load(false); });
+    }
+
+    $("btn-sub").onclick = function () { if (S.ctx) openSub("لینک اشتراک", S.ctx.subUrl); };
+    $("btn-cfg").onclick = function () { paintCfgs(); open("m-cfg"); };
+    $("copy-sub").onclick = function () { if ($("sub-link").value) copy($("sub-link").value, $("copy-sub")); };
+
+    $("apps").addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-os]");
+      if (btn) openOsModal(btn.getAttribute("data-os"));
+    });
+
+    $("cfg-list").onclick = function (e) {
+      var b = e.target.closest("[data-a]");
+      if (!b) return;
+      var it = S.items[Number(b.closest("[data-i]").getAttribute("data-i"))];
+      if (!it) return;
+      var a = b.getAttribute("data-a");
+      if (a === "cp") copy(it.payload, b);
+      else if (a === "qr") { close("m-cfg"); openSub(it.title, it.payload); }
+      else if (a === "dl") { var w = wgText(it.payload); if (w) dl(w, it.title); }
+    };
+
+    document.querySelectorAll("[data-close]").forEach(function (b) {
+      b.onclick = function () { close(b.getAttribute("data-close")); };
+    });
+    document.querySelectorAll(".overlay").forEach(function (v) {
+      v.onclick = function (e) { if (e.target === v) close(v.id); };
+    });
+    document.onkeydown = function (e) {
+      if (e.key === "Escape") { close("m-sub"); close("m-cfg"); close("m-apps"); }
+    };
+
+    var auto = detect();
+    if (auto) boot(auto);
+    else {
+      var c = makeCtx(CFG.panelUrl || CFG.panel || "", CFG.subscriptionUrl || CFG.token || CFG.sub || "");
+      if (c) boot(c);
+      else {
+        var p = localStorage.getItem(LS.panel), t = localStorage.getItem(LS.token);
+        if (p && t) { c = makeCtx(p, t); if (c) boot(c); }
+      }
+    }
+  })();
+  </script>
+</body>
+</html>
