@@ -5,7 +5,7 @@
 #
 set -euo pipefail
 
-readonly SCRIPT_VERSION="1.4.1"
+readonly SCRIPT_VERSION="1.5.0"
 readonly TARGET_DIR="/var/lib/pasarguard/templates/subscription"
 readonly TARGET_FILE="${TARGET_DIR}/index.html"
 readonly ENV_FILE="/opt/pasarguard/.env"
@@ -13,6 +13,7 @@ readonly INSTALLER_RAW="https://raw.githubusercontent.com/Mrclocks/PGClock/main/
 
 readonly URL_LITE="https://raw.githubusercontent.com/Mrclocks/PGClockLite/main/index.html"
 readonly URL_STANDARD="https://raw.githubusercontent.com/Mrclocks/PGClock/main/index.html"
+readonly URL_PLUS="https://raw.githubusercontent.com/Mrclocks/PGClockPlus/main/index.html"
 readonly URL_PRO="https://raw.githubusercontent.com/Mrclocks/PGClockPRO/main/index.html"
 
 # When run via "curl | bash", stdin is the pipe — re-download and re-run from a real file.
@@ -39,9 +40,10 @@ if [[ -t 1 ]]; then
   readonly C_YELLOW='\033[33m'
   readonly C_BLUE='\033[34m'
   readonly C_CYAN='\033[36m'
+  readonly C_MAGENTA='\033[35m'
   readonly C_WHITE='\033[97m'
 else
-  readonly C_RESET='' C_BOLD='' C_DIM='' C_RED='' C_GREEN='' C_YELLOW='' C_BLUE='' C_CYAN='' C_WHITE=''
+  readonly C_RESET='' C_BOLD='' C_DIM='' C_RED='' C_GREEN='' C_YELLOW='' C_BLUE='' C_CYAN='' C_MAGENTA='' C_WHITE=''
 fi
 
 log_line() { printf '%b\n' "$1"; }
@@ -367,6 +369,25 @@ configure_env() {
 }
 
 restart_pasarguard() {
+  local answer
+
+  log_blank
+  log_line "${C_BOLD}Restart Pasarguard?${C_RESET}"
+  log_line "${C_DIM}If you previously used other templates, a restart is not required.${C_RESET}"
+  log_line "${C_DIM}If this is your first install, you should restart.${C_RESET}"
+  log_blank
+  read_tty "$(printf '%b' "${C_BOLD}Restart now? [Y/n]: ${C_RESET}")" answer
+  answer="${answer:-y}"
+
+  case "${answer,,}" in
+    y|yes)
+      ;;
+    *)
+      info "Skipped Pasarguard restart. Run manually later if needed: pasarguard restart"
+      return 0
+      ;;
+  esac
+
   info "Restarting Pasarguard..."
   if command -v pasarguard >/dev/null 2>&1; then
     if pasarguard restart; then
@@ -384,7 +405,8 @@ print_menu() {
   log_blank
   log_line "  ${C_GREEN}1${C_RESET}) ${C_BOLD}PGClock Lite${C_RESET}   ${C_DIM}Lightweight and fast${C_RESET}"
   log_line "  ${C_CYAN}2${C_RESET}) ${C_BOLD}PGClock${C_RESET}        ${C_DIM}Standard edition (recommended)${C_RESET}"
-  log_line "  ${C_YELLOW}3${C_RESET}) ${C_BOLD}PGClock Pro${C_RESET}     ${C_DIM}Custom brand name, tagline, and logo${C_RESET}"
+  log_line "  ${C_MAGENTA}3${C_RESET}) ${C_BOLD}PGClock Plus${C_RESET}   ${C_DIM}Simple, clean, and beautiful${C_RESET}"
+  log_line "  ${C_YELLOW}4${C_RESET}) ${C_BOLD}PGClock Pro${C_RESET}     ${C_DIM}Custom brand name, tagline, and logo${C_RESET}"
   log_line "  ${C_RED}0${C_RESET}) ${C_BOLD}Exit${C_RESET}"
   log_blank
 }
@@ -431,6 +453,11 @@ install_standard() {
   download_template "$URL_STANDARD" "$TARGET_FILE"
 }
 
+install_plus() {
+  info "Installing ${C_BOLD}PGClock Plus${C_RESET}..."
+  download_template "$URL_PLUS" "$TARGET_FILE"
+}
+
 install_pro() {
   local backup
 
@@ -473,7 +500,7 @@ main() {
 
   while true; do
     print_menu
-    read_tty "$(printf '%b' "${C_BOLD}Enter your choice [0-3]: ${C_RESET}")" choice
+    read_tty "$(printf '%b' "${C_BOLD}Enter your choice [0-4]: ${C_RESET}")" choice
     choice="${choice:-}"
 
     case "$choice" in
@@ -488,6 +515,11 @@ main() {
         break
         ;;
       3)
+        install_plus
+        edition="PGClock Plus"
+        break
+        ;;
+      4)
         install_pro
         edition="PGClock Pro"
         break
@@ -497,7 +529,7 @@ main() {
         exit 0
         ;;
       *)
-        warn "Invalid choice. Please enter a number from 0 to 3."
+        warn "Invalid choice. Please enter a number from 0 to 4."
         log_blank
         ;;
     esac
