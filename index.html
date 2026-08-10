@@ -5,11 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
   <title>پنل کاربری</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Regular.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Bold.woff2">
   <style>
     @font-face {
       font-family: Vazirmatn;
-      src: url("https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn%5Bwght%5D.woff2") format("woff2-variations");
-      font-weight: 100 900;
+      src: url("https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Regular.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: Vazirmatn;
+      src: url("https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Medium.woff2") format("woff2");
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: Vazirmatn;
+      src: url("https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-SemiBold.woff2") format("woff2");
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: Vazirmatn;
+      src: url("https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Bold.woff2") format("woff2");
+      font-weight: 700;
+      font-style: normal;
       font-display: swap;
     }
 
@@ -48,9 +74,40 @@
       }
     }
 
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(107, 163, 199, 0.45) transparent;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    .modal-body::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    html::-webkit-scrollbar-track,
+    body::-webkit-scrollbar-track,
+    .modal-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    html::-webkit-scrollbar-thumb,
+    body::-webkit-scrollbar-thumb,
+    .modal-body::-webkit-scrollbar-thumb {
+      background: rgba(107, 163, 199, 0.38);
+      border-radius: 99px;
+    }
+
+    html::-webkit-scrollbar-thumb:hover,
+    body::-webkit-scrollbar-thumb:hover,
+    .modal-body::-webkit-scrollbar-thumb:hover {
+      background: rgba(107, 163, 199, 0.62);
+    }
+
     body {
       min-height: 100dvh;
-      font-family: Vazirmatn, Tahoma, sans-serif;
+      font-family: Vazirmatn, "Segoe UI", Tahoma, sans-serif;
       font-size: 15px;
       line-height: 1.6;
       color: var(--text);
@@ -58,6 +115,8 @@
       padding: max(24px, env(safe-area-inset-top)) 20px max(32px, env(safe-area-inset-bottom));
       -webkit-font-smoothing: antialiased;
       overflow-x: clip;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(107, 163, 199, 0.45) transparent;
     }
 
     body::after {
@@ -224,11 +283,20 @@
     }
 
     .btn svg,
-    .modal-title svg {
+    .modal-title svg,
+    .stat-title svg,
+    .apps-title svg {
       width: 18px;
       height: 18px;
       flex-shrink: 0;
       display: block;
+    }
+
+    .stat-title svg,
+    .apps-title svg {
+      width: 17px;
+      height: 17px;
+      opacity: 0.95;
     }
 
     .support-btn.on { display: inline-grid; }
@@ -356,6 +424,7 @@
     }
 
     .stat-rem,
+    .stat-used,
     .stat-tot {
       display: flex;
       align-items: center;
@@ -367,7 +436,8 @@
       min-width: 0;
     }
 
-    .stat-rem {
+    .stat-rem,
+    .stat-used {
       background: var(--accent-dim);
       border: 1px solid var(--accent-soft);
     }
@@ -901,6 +971,8 @@
       overflow-y: auto;
       overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(107, 163, 199, 0.45) transparent;
     }
 
     .qr-panel {
@@ -1148,7 +1220,10 @@
       .stat-body,
       .modal-body { padding: 10px; }
       .stat-rem,
+      .stat-used,
       .stat-tot { padding: 0 8px; }
+      .stat-title svg,
+      .apps-title svg { width: 15px; height: 15px; }
       .stat-v { font-size: 0.9rem; }
       .stat-sub { font-size: 0.64rem; }
 
@@ -1242,9 +1317,13 @@
 
     <div class="stats">
       <div class="stat">
-        <div class="stat-title" id="vol-title"><span class="stat-pulse" aria-hidden="true"></span>حجم</div>
+        <div class="stat-title" id="vol-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+          <span class="stat-pulse" aria-hidden="true"></span>حجم
+        </div>
         <div class="stat-body">
           <div class="stat-rem"><span class="stat-sub">باقی‌مانده</span><span class="stat-v" id="vol-rem">—</span></div>
+          <div class="stat-used"><span class="stat-sub">مصرف</span><span class="stat-v" id="vol-used">—</span></div>
           <div class="stat-tot"><span class="stat-sub">کل</span><span class="stat-v-sm" id="vol-tot">—</span></div>
           <div class="bar-row" id="vol-bar-row">
             <div class="bar" id="vol-bar-wrap"><i id="vol-bar"></i></div>
@@ -1253,9 +1332,13 @@
         </div>
       </div>
       <div class="stat">
-        <div class="stat-title" id="exp-title"><span class="stat-pulse" aria-hidden="true"></span>زمان</div>
+        <div class="stat-title" id="exp-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span class="stat-pulse" aria-hidden="true"></span>زمان
+        </div>
         <div class="stat-body">
           <div class="stat-rem"><span class="stat-sub">باقی‌مانده</span><span class="stat-v" id="exp-rem">—</span></div>
+          <div class="stat-used"><span class="stat-sub">گذشته</span><span class="stat-v" id="exp-used">—</span></div>
           <div class="stat-tot"><span class="stat-sub">کل</span><span class="stat-v-sm" id="exp-tot">—</span></div>
           <div class="bar-row" id="exp-bar-row">
             <div class="bar" id="exp-bar-wrap"><i id="exp-bar"></i></div>
@@ -1278,7 +1361,10 @@
 
     <div id="apps">
       <div class="apps-panel">
-        <div class="apps-title">اپلیکیشن‌ها</div>
+        <div class="apps-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          اپلیکیشن‌ها
+        </div>
         <div class="apps-body"><div class="empty">—</div></div>
       </div>
     </div>
@@ -1691,6 +1777,7 @@
 
       var remain = limit > 0 ? Math.max(0, limit - used) : null;
       $("vol-rem").textContent = limit > 0 ? bytes(remain) : "∞";
+      $("vol-used").textContent = bytes(Math.max(0, used));
       $("vol-tot").textContent = limit > 0 ? bytes(limit) : "∞";
       var volInfinite = !(limit > 0);
       var volPct = volInfinite ? 100 : (remain / limit) * 100;
@@ -1702,6 +1789,7 @@
       var created = stamp(g(u, ["created_at", "created"]));
       var expMs = stamp(ex);
       var remText = daysLeft(ex);
+      var usedText = "—";
       var totText = "—";
       var expPct = null;
       var expInfinite = false;
@@ -1711,15 +1799,23 @@
         totText = "∞";
         expPct = 100;
         expInfinite = true;
+        if (created) {
+          usedText = faNum(Math.max(0, Math.floor((Date.now() - created) / 86400000))) + " روز";
+        }
       } else if (expMs) {
         if (created && expMs > created) {
           var totalDays = Math.max(1, Math.ceil((expMs - created) / 86400000));
           var leftDays = Math.ceil((expMs - Date.now()) / 86400000);
+          var elapsedDays = Math.max(0, totalDays - Math.max(0, leftDays));
           totText = faNum(totalDays) + " روز";
+          usedText = faNum(elapsedDays) + " روز";
           expPct = (Math.max(0, leftDays) / totalDays) * 100;
-          if (leftDays <= 0) { remText = "منقضی"; expPct = 0; }
+          if (leftDays <= 0) { remText = "منقضی"; expPct = 0; usedText = faNum(totalDays) + " روز"; }
         } else {
           totText = dateFa(ex);
+          if (created) {
+            usedText = faNum(Math.max(0, Math.floor((Date.now() - created) / 86400000))) + " روز";
+          }
         }
       }
 
@@ -1727,6 +1823,7 @@
       var expLow = !expInfinite && expTone === "bad";
 
       $("exp-rem").textContent = remText;
+      $("exp-used").textContent = usedText;
       $("exp-tot").textContent = totText;
       setBar($("exp-bar-wrap"), $("exp-bar"), expPct, expTone, $("exp-pct"), $("exp-bar-row"), expInfinite ? "∞" : null);
       $("exp-title").classList.toggle("alert", expLow);
@@ -1944,14 +2041,16 @@
 
     function openOsModal(k) {
       var list = S.groups[k] || [];
-      $("m-apps-t").textContent = PLAT[k] || k;
+      $("m-apps-t").innerHTML = platIcon(k) + "<span>" + esc(PLAT[k] || k) + "</span>";
       $("m-apps-list").innerHTML = list.length ? list.map(appCardHtml).join("") : '<div class="empty">اپلیکیشنی نیست</div>';
       open("m-apps");
     }
 
+    var APPS_TITLE_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>';
+
     function paintApps() {
       var shell = function (inner) {
-        return '<div class="apps-panel"><div class="apps-title">اپلیکیشن‌ها</div><div class="apps-body">' + inner + '</div></div>';
+        return '<div class="apps-panel"><div class="apps-title">' + APPS_TITLE_ICO + 'اپلیکیشن‌ها</div><div class="apps-body">' + inner + '</div></div>';
       };
       if (!S.apps.length) {
         $("apps").innerHTML = shell('<div class="empty">اپلیکیشنی نیست</div>');
