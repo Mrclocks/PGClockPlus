@@ -5,16 +5,17 @@
 #
 set -euo pipefail
 
-readonly SCRIPT_VERSION="1.5.0"
+readonly SCRIPT_VERSION="1.5.1"
 readonly TARGET_DIR="/var/lib/pasarguard/templates/subscription"
 readonly TARGET_FILE="${TARGET_DIR}/index.html"
 readonly ENV_FILE="/opt/pasarguard/.env"
 readonly INSTALLER_RAW="https://raw.githubusercontent.com/Mrclocks/PGClock/main/install.sh"
+readonly CACHE_BUST="v=1.5.1"
 
-readonly URL_LITE="https://raw.githubusercontent.com/Mrclocks/PGClockLite/main/index.html"
-readonly URL_STANDARD="https://raw.githubusercontent.com/Mrclocks/PGClock/main/index.html"
-readonly URL_PLUS="https://raw.githubusercontent.com/Mrclocks/PGClockPlus/main/index.html"
-readonly URL_PRO="https://raw.githubusercontent.com/Mrclocks/PGClockPRO/main/index.html"
+readonly URL_LITE="https://raw.githubusercontent.com/Mrclocks/PGClockLite/main/index.html?${CACHE_BUST}"
+readonly URL_STANDARD="https://raw.githubusercontent.com/Mrclocks/PGClock/main/index.html?${CACHE_BUST}"
+readonly URL_PLUS="https://raw.githubusercontent.com/Mrclocks/PGClockPlus/main/index.html?${CACHE_BUST}"
+readonly URL_PRO="https://raw.githubusercontent.com/Mrclocks/PGClockPRO/main/index.html?${CACHE_BUST}"
 
 # When run via "curl | bash", stdin is the pipe — re-download and re-run from a real file.
 if [[ ! -t 0 ]] && [[ -z "${PGCLOCK_INSTALL_REEXEC:-}" ]]; then
@@ -125,9 +126,18 @@ validate_logo_url() {
 download_template() {
   local url="$1"
   local dest="$2"
+  local tmp
   info "Downloading template from GitHub..."
-  wget -N -O "$dest" "$url" || fail "Download failed. Check your internet connection and the URL."
-  [[ -s "$dest" ]] || fail "Downloaded file is empty."
+  tmp="$(mktemp "${dest}.XXXXXX")"
+  # Force a fresh download every time (avoid wget -N skipping updates / CDN cache).
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL --retry 3 --retry-delay 1 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' \
+      "$url" -o "$tmp" || { rm -f "$tmp"; fail "Download failed. Check your internet connection and the URL."; }
+  else
+    wget -O "$tmp" --no-cache --no-cookies "$url" || { rm -f "$tmp"; fail "Download failed. Check your internet connection and the URL."; }
+  fi
+  [[ -s "$tmp" ]] || { rm -f "$tmp"; fail "Downloaded file is empty."; }
+  mv -f "$tmp" "$dest"
   ok "index.html downloaded"
 }
 
