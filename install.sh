@@ -5,12 +5,12 @@
 #
 set -euo pipefail
 
-readonly SCRIPT_VERSION="1.5.1"
+readonly SCRIPT_VERSION="1.5.2"
 readonly TARGET_DIR="/var/lib/pasarguard/templates/subscription"
 readonly TARGET_FILE="${TARGET_DIR}/index.html"
 readonly ENV_FILE="/opt/pasarguard/.env"
 readonly INSTALLER_RAW="https://raw.githubusercontent.com/Mrclocks/PGClock/main/install.sh"
-readonly CACHE_BUST="v=1.5.1"
+readonly CACHE_BUST="v=1.5.2"
 
 readonly URL_LITE="https://raw.githubusercontent.com/Mrclocks/PGClockLite/main/index.html?${CACHE_BUST}"
 readonly URL_STANDARD="https://raw.githubusercontent.com/Mrclocks/PGClock/main/index.html?${CACHE_BUST}"

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
-  <meta name="pgclock-plus" content="1.5.1">
+  <meta name="pgclock-plus" content="1.5.2">
   <title>پنل کاربری</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
@@ -1630,7 +1630,7 @@
     function bytes(v) {
       v = Number(v);
       if (!isFinite(v)) return "—";
-      var u = ["بایت", "KB", "MB", "گیگ", "TB"];
+      var u = ["بایت", "کیل", "مگ", "گیگ", "ترا"];
       var i = Math.min(4, Math.floor(Math.log(Math.max(v, 1)) / Math.log(1024)));
       return faNum((v / Math.pow(1024, i)).toFixed(i > 1 ? 1 : 0).replace(/\.0$/, "")) + " " + u[i];
     }
